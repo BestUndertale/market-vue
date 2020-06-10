@@ -5,6 +5,7 @@ import Login from '../components/Login'
 import Home from '../components/Home'
 import GoodsIndex from "../components/goods/GoodsIndex";
 import Register from "../components/Register";
+import Add from "../components/goods/Add";
 
 Vue.use(Router)
 
@@ -32,11 +33,19 @@ export default new Router({
           meta: {
             requireAuth: true
           }
+        },
+        {
+          path:'/add',
+          name:'Add',
+          component:Add,
+          meta: {
+            requireAuth: true
+          }
         }
       ]
     },
     {
-      path: '',
+      path: '/',
       name: 'Login',
       component: Login
     }

@@ -5,7 +5,7 @@
       <el-tooltip effect="dark" placement="right"
                   v-for="item in goods"
                   :key="item.id">
-        <p slot="content" style="font-size: 14px;margin-bottom: 6px;">{{item.name}}</p>
+        <p slot="content" style="font-size: 14px;margin-bottom: 6px;"v-model="name">{{item.name}}</p>
         <p slot="content" style="font-size: 13px;margin-bottom: 6px">
           <span>{{item.seller}}</span>
         </p>
@@ -21,7 +21,7 @@
             </div>
           </div>
           <div class="price">{{item.price}}</div>
-          <el-button type="primary" plain @click="buy">购买</el-button>
+          <el-button type="primary" plain @click="buy(item)">购买</el-button>
         </el-card>
       </el-tooltip>
     </el-row>
@@ -53,7 +53,7 @@
         this.loadGoods()
     },
       methods: {
-        loadGoods () {
+        loadGoods() {
           var _this = this
           this.$axios.get('/goods').then(resp => {
             if (resp && resp.status === 200) {
@@ -65,7 +65,7 @@
           this.currentPage = currentPage
           console.log(this.currentPage)
         },
-        buy(){
+        buy(item) {
           this.$confirm('确认购买？', '提示', {
             confirmButtonText: '确定',
             cancelButtonText: '取消',
@@ -75,6 +75,17 @@
               type: 'success',
               message: '购买成功!'
             });
+            this.$axios.post('/buy', {//发送数据
+              name:item.name,
+              price:item.price,
+              seller:item.seller
+            });
+            this.$axios
+              .post('/delete', {id: item.id}).then(resp => {
+              if (resp && resp.status === 200) {
+                this.loadBooks()
+              }
+            });
           }).catch(() => {
             this.$message({
               type: 'info',
@@ -82,52 +93,6 @@
             });
           });
         },
-        searchResult () {
-          var _this = this
-          this.$axios
-            .get('/search?keywords=' + this.$refs.searchBar.keywords, {
-            }).then(resp => {
-            if (resp && resp.status === 200) {
-              _this.goods = resp.data
-            }
-          })
-        },
-        deleteGoods (id) {
-          this.$confirm('此操作将永久删除, 是否继续?', '提示', {
-            confirmButtonText: '确定',
-            cancelButtonText: '取消',
-            type: 'warning'
-          }).then(() => {
-              this.$axios
-                .post('/delete', {id: id}).then(resp => {
-                if (resp && resp.status === 200) {
-                  this.loadGoods()
-                }
-              })
-            }
-          ).catch(() => {
-            this.$message({
-              type: 'info',
-              message: '已取消删除'
-            })
-          })
-          // alert(id)
-        },
-        editGoods (item) {
-          this.$refs.edit.dialogFormVisible = true
-          this.$refs.edit.form = {
-            id: item.id,
-            name: item.name,
-            seller: item.seller,
-            price: item.price,
-            cover: item.image,
-            information: item.information,
-            category: {
-              id: item.category.id.toString(),
-              cname: item.category.cname
-            }
-          }
-        }
       }
     }
 </script>
